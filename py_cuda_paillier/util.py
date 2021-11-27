@@ -1,4 +1,4 @@
-"""Help functions for py_paillier"""
+"""Help functions for py_cuda_paillier"""
 
 import random
 
