@@ -5,11 +5,12 @@ with open("README.md", "r") as readme_file:
 
 setup(
     name="py_cuda_paillier",
-    version="0.0.1",
+    version="0.0.3",
     author="Vsevolod Vlasov",
     author_email="cold.vv.ss@gmail.com",
     description="Adapted Paillier Cryptosystem to CUDA architecture",
     long_description=readme,
+    long_description_content_type='text/markdown',
     url="https://github.com/homo-paillier-cryprosystem/py-cuda-paillier/",
     packages=find_packages(),
     classifiers=[

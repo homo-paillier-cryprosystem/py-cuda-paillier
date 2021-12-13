@@ -532,7 +532,8 @@ class Homomorphic(PaillierPublicKey):
         else:
             second_encrypt_text_as_digits_list = self.cuda_encryption(
                 second_plaintext_as_digits_list,
-                cuda_config
+                cuda_config,
+                don_t_use_r=True
             )
             addition = self.cuda_addition_of_two_ciphertexts(
                 first_encrypt_text_as_digits_list,
