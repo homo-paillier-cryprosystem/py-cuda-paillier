@@ -266,7 +266,7 @@ class PaillierPrivateKey(object):
         for encrypt_digit in encryption_digits_list:
             decrypt_digit = (
                     (l_func(
-                        (encrypt_digit ** self.lambdas) % (self.__public_key.n ** 2),
+                        pow(encrypt_digit, self.lambdas, self.__public_key.n_square),
                         self.__public_key.n
                     ) * self.mu) % self.__public_key.n
             )

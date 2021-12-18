@@ -163,10 +163,10 @@ class HomomorphicTest(TestCase):
             self.assertEqual(public_key.n_square, homomorphic.n_square)
 
     def test_addition_of_two_ciphertexts(self):
-        public_key: PaillierPublicKey
-        private_key: PaillierPrivateKey
         p = 223
         q = 211
+        public_key: PaillierPublicKey
+        private_key: PaillierPrivateKey
         public_key, private_key = pkpg().paillier_key_pair_generation_from_pq(p, q)
         homomorphic = Homomorphic(public_key.n, public_key.g, p, q)
 
