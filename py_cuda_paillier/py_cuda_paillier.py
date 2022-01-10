@@ -28,9 +28,15 @@ class CudaConfig(object):
         :arg threads_per_block (int): number of threads in a block
         :arg blocks (int): number of blocks in the grid
     """
-    def __init__(self, threads_per_block, blocks):
-        self.threads_per_block = threads_per_block
-        self.blocks = blocks
+    def __init__(self, threads_per_block: int, blocks: int):
+        if isinstance(threads_per_block, int) and isinstance(blocks, int):
+            self.threads_per_block: int = threads_per_block
+            self.blocks: int = blocks
+        else:
+            print("The input data (threads_per_block or blocks) is of an invalid type.")
+            print("Class parameters value threads_per_block and blocks were set to 1.")
+            self.threads_per_block = 1
+            self.blocks = 1
 
 
 class PaillierPublicKey(object):
@@ -45,15 +51,27 @@ class PaillierPublicKey(object):
         [1] - https://en.wikipedia.org/wiki/Paillier_cryptosystem#Key_generation
     """
 
-    def __init__(self, n, p, q):
-        # public key
-        self.n = n
-        self.g = self.generation_g(self.n)
-
-        # parameters for calculations
-        self.n_square = n ** 2
-        self.__p = p
-        self.__q = q
+    def __init__(self, n: int, p: int, q: int):
+        if isinstance(n, int) and isinstance(p, int) and isinstance(q, int):
+            # public key
+            self.n = n
+            self.g = self.generation_g(self.n)
+            # parameters for calculations
+            self.n_square = self.n ** 2
+            self.__p = p
+            self.__q = q
+        else:
+            print("The input data (n, p or q) is of an invalid type.")
+            # public key
+            self.n = 1517
+            self.g = self.generation_g(self.n)
+            # parameters for calculations
+            self.n_square = self.n ** 2
+            self.__p = 41
+            self.__q = 37
+            print("Class parameters value were set to:")
+            print(f"\tn = {self.n}")
+            print(f"\tg = {self.g}")
 
     @staticmethod
     def generation_g(_n: int):
@@ -79,6 +97,9 @@ class PaillierPublicKey(object):
         :param don_t_use_r: (bool) optional, used for homomorphic encryption function
         :return: empty list [] or non-empty list including encrypted digits
         """
+        if not isinstance(don_t_use_r, bool):
+            print("The parameter 'don_t_use_r' did not match a boolean type, so its value was set to False.")
+            don_t_use_r = False
         plaintext_is_current: bool = check_plaintext(
             plaintext_as_digits_list, self.n
         )
@@ -91,7 +112,7 @@ class PaillierPublicKey(object):
                     )
             else:
                 for digit in plaintext_as_digits_list:
-                    r = PrimeDigit().generating_a_large_prime_modulo(self.n)
+                    r = PrimeDigit().gen_mutually(self.n)
                     encrypt_text_as_digits_list.append(
                         ((self.g ** digit) * (r ** self.n)) % self.n_square
                     )
@@ -145,6 +166,12 @@ class PaillierPublicKey(object):
 
             _np_enc_text[thread_id] = (g_pow * r_pow) % n_square
 
+        if not isinstance(don_t_use_r, bool):
+            print("The parameter 'don_t_use_r' did not match a boolean type, so its value was set to False.")
+            don_t_use_r = False
+        if not isinstance(cuda_config, CudaConfig):
+            print("The parameter 'cuda_config' did not match a boolean type, so its value was set to [1, 1].")
+            cuda_config = CudaConfig(1, 1)
         plaintext_is_current: bool = check_plaintext(
             plaintext_as_digits_list, self.n
         )
@@ -217,10 +244,17 @@ class PaillierPrivateKey(object):
         [1] - https://en.wikipedia.org/wiki/Paillier_cryptosystem#Key_generation
     """
 
-    def __init__(self, public_key, p, q):
-        self.__public_key: PaillierPublicKey = public_key
-        self.__p = p
-        self.__q = q
+    def __init__(self, public_key: PaillierPublicKey, p: int, q: int):
+        if isinstance(public_key, PaillierPublicKey) and isinstance(p, int) and isinstance(q, int):
+            self.__public_key: PaillierPublicKey = public_key
+            self.__p = p
+            self.__q = q
+        else:
+            print("The input data (public_key, p or q) is of an invalid type.")
+            self.__public_key: PaillierPublicKey = PaillierPublicKey(1517, 41, 38)
+            self.__p = 41
+            self.__q = 38
+
         self.lambdas = self.generation_lambdas(self.__p, self.__q)
         self.mu = self.generation_mu(self.__public_key.g, self.__public_key.n, self.lambdas)
 
@@ -301,6 +335,10 @@ class PaillierPrivateKey(object):
 
             dec_text[thread_id] = (res_l_func * mu) % n
 
+        if not isinstance(cuda_config, CudaConfig):
+            print("The parameter 'cuda_config' did not match a boolean type, so its value was set to [1, 1].")
+            cuda_config = CudaConfig(1, 1)
+
         np_encryption_digits_list = np.array(encryption_digits_list, dtype=np.uint64)
         device_np_enc_dl = cuda.to_device(np_encryption_digits_list)
 
@@ -350,6 +388,13 @@ class PaillierKeyPairGenerator(object):
 
             return _p, _q
 
+        if not isinstance(bit_key_length, int):
+            print("Parameter 'bit_key_length' must be type 'int', set value 12.")
+            bit_key_length = DEFAULT_BIT_KEY_LENGTH
+        if not isinstance(return_pq, bool):
+            print("Parameter 'return_pq' must be type 'bool', set value False.")
+            return_pq = False
+
         p, q = p_q_generating(bit_key_length // 2)
 
         n = p * q
@@ -369,6 +414,13 @@ class PaillierKeyPairGenerator(object):
         :param q: (int) large prime
         :return: object's of classes PaillierPublicKey and PaillierPrivateKey
         """
+        if not isinstance(p, int):
+            print("Parameter 'p' must be type 'int', set value 41.")
+            p = 41
+        if not isinstance(q, int):
+            print("Parameter 'q' must be type 'int', set value 38.")
+            q = 38
+
         n = p * q
 
         public_key = PaillierPublicKey(n, p, q)

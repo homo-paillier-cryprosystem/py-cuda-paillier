@@ -5,7 +5,7 @@ with open("README.md", "r") as readme_file:
 
 setup(
     name="py_cuda_paillier",
-    version="0.0.4",
+    version="0.0.5",
     author="Vsevolod Vlasov",
     author_email="cold.vv.ss@gmail.com",
     description="Adapted Paillier Cryptosystem to CUDA architecture",

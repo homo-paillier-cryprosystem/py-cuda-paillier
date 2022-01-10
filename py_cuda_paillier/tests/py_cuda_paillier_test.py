@@ -484,5 +484,110 @@ class HomomorphicCudaTest(TestCase):
         self.assertEqual(default_multiple_plaintexts_to_k, decrypt_raising)
 
 
+class InputTypesTest(TestCase):
+
+    def test_cuda_config(self):
+        threads_types = [1, 1.0, '1', [1]]
+        blocks_types = [2, 2.0, '2', [2]]
+
+        for threads_type in threads_types:
+            for blocks_type in blocks_types:
+                cuda_config = CudaConfig(
+                    threads_per_block=threads_type,
+                    blocks=blocks_type
+                )
+
+                self.assertEqual(type(cuda_config.threads_per_block), int)
+                self.assertEqual(type(cuda_config.blocks), int)
+
+    def test_public_key(self):
+        n_types = [2, 2.0, '2', [2]]
+        p_types = [3, 3.0, '3', [3]]
+        q_types = [4, 4.0, '4', [4]]
+
+        for n_type in n_types:
+            for p_type in p_types:
+                for q_type in q_types:
+                    public_key = PaillierPublicKey(
+                        n=n_type, p=p_type, q=q_type
+                    )
+
+                    self.assertEqual(type(public_key.n), int)
+                    self.assertEqual(type(public_key.g), int)
+
+    def test_encryption(self):
+        plaintext = [
+            1, 2.0, '3', False
+        ]
+
+        public_key, private_key = pkpg.paillier_key_pair_generation()
+
+        enc_text = public_key.encryption(plaintext)
+
+        self.assertEqual([], enc_text)
+
+    def test_cuda_encryption(self):
+        plaintext = [
+            1, 2.0, '3', False, True
+        ]
+
+        public_key, private_key = pkpg.paillier_key_pair_generation()
+
+        cuda_config = CudaConfig(1, 5)
+
+        enc_text = public_key.cuda_encryption(plaintext, cuda_config)
+
+        self.assertEqual([], enc_text)
+
+    def test_private_key(self):
+        n_types = [2.0, '2', [2]]
+        p_types = [3.0, '3', [3]]
+        q_types = [4.0, '4', [4]]
+
+        for n_type in n_types:
+            for p_type in p_types:
+                for q_type in q_types:
+                    print(type(n_type), type(p_type), type(q_type))
+                    public_key = PaillierPublicKey(
+                        n=n_type, p=p_type, q=q_type
+                    )
+
+                    private_key = PaillierPrivateKey(
+                        public_key=public_key, p=p_type, q=q_type
+                    )
+
+                    self.assertEqual(type(private_key.lambdas), int)
+                    self.assertEqual(type(private_key.mu), int)
+
+    def test_key_pair_generations(self):
+        bit_key_length_types = [10, 10.0, '10']
+        return_pq_types = [10, 10.0, '10', False]
+
+        for bit_key_length_type in bit_key_length_types:
+            for return_pq_type in return_pq_types:
+                public_key, private_key = pkpg.paillier_key_pair_generation(
+                    bit_key_length=bit_key_length_type,
+                    return_pq=return_pq_type
+                )
+
+                self.assertEqual(type(public_key.n), int)
+                self.assertEqual(type(public_key.g), int)
+                self.assertEqual(type(private_key.lambdas), int)
+                self.assertEqual(type(private_key.mu), int)
+
+        p_types = [3.0, '3', [3]]
+        q_types = [4.0, '4', [4]]
+        for p_type in p_types:
+            for q_type in q_types:
+                public_key, private_key = pkpg.paillier_key_pair_generation_from_pq(
+                    p=p_type, q=q_type
+                )
+
+                self.assertEqual(type(public_key.n), int)
+                self.assertEqual(type(public_key.g), int)
+                self.assertEqual(type(private_key.lambdas), int)
+                self.assertEqual(type(private_key.mu), int)
+
+
 if __name__ == '__main__':
     main()

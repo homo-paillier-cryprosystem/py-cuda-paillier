@@ -217,6 +217,17 @@ class PrimeDigit(object):
 
         return primes_list
 
+    @staticmethod
+    def gen_mutually(n: int):
+        digit = random.SystemRandom().randrange(
+            n // 2, n
+        )
+        if Euclid().greatest_common_divisor(digit, n) != 1:
+            digit = random.SystemRandom().randrange(
+                n // 2, n
+            )
+        return digit
+
 
 def calc_reduced_system_deductions(n: int):
     """Function for calculating the reduced system of residues modulo n.
